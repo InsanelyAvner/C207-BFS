@@ -41,7 +41,7 @@ dice = None
 rollButton = None
 resetButton = None
 
-winingMessage = None
+winningMessage = None
 
 winingFunctionCall = 0
 
@@ -219,7 +219,7 @@ def gameWindow():
     global screen_width
     global screen_height
     global dice
-    global winingMessage
+    global winningMessage
     global resetButton
 
 
@@ -244,7 +244,7 @@ def gameWindow():
     # ------------ Boilerplate Code
 
     # Declaring Wining Message
-    winingMessage = canvas2.create_text(screen_width/2 + 10, screen_height/2 + 250, text = "", font=("Chalkboard SE",100), fill='#fff176')
+    winningMessage = canvas2.create_text(screen_width/2 + 10, screen_height/2 + 250, text = "", font=("Chalkboard SE",100), fill='#fff176')
 
     # Creating Reset Button
     resetButton =  Button(gameWindow,text="Reset Game", fg='black', font=("Chalkboard SE", 15), bg="grey",command=restGame, width=20, height=5)
@@ -352,9 +352,31 @@ def restGame():
     SERVER.send("reset game".encode())
 
 
-def handleWin():
-    pass    
-# handleWin() function code goes here
+def handleWin(message):
+    global playerType
+    global rollButton
+    global canvas2
+    global winningMessage
+    global screen_width
+    global screen_height
+    global resetButton
+
+    # Destroy button
+    if "Red" in message:
+        if playerType == "player2":
+            rollButton.destroy()
+    
+    if "Yellow" in message:
+        if playerType == "player1":
+            rollButton.destroy()
+    
+    # Add winning message
+    message = message.split(".")[0] + "."
+    canvas2.itemconfigure(winningMessage, text=message)
+
+    # Place the reset button
+    resetButton.place(x=screen_width/2-80, y=screen_height-220)
+
 
 def updateScore(message):
     global canvas2
@@ -388,7 +410,7 @@ def handleResetGame():
     global leftBoxes
     global finishingBox
     global resetButton
-    global winingMessage
+    global winningMessage
     global winingFunctionCall
 
     canvas2.itemconfigure(dice, text='\u2680')
@@ -411,7 +433,7 @@ def handleResetGame():
 
 
     finishingBox.configure(bg='green')
-    canvas2.itemconfigure(winingMessage, text="")
+    canvas2.itemconfigure(winningMessage, text="")
     resetButton.destroy()
 
     # Again Recreating Reset Button for next game
@@ -483,7 +505,7 @@ def recivedMsg():
             handleResetGame()
         #--------- Boilerplate Code End--------
 
-
+        
         #creating rollbutton
         if('player1Turn' in message and playerType == 'player1'):
             playerTurn = True
@@ -518,9 +540,6 @@ def recivedMsg():
             canvas2.itemconfigure(player2Label, text=player2Name)
 
 
-
-
-
 def setup():
     global SERVER
     global PORT
@@ -536,8 +555,6 @@ def setup():
     thread.start()
 
     askPlayerName()
-
-
 
 
 setup()
